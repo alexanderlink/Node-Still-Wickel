@@ -1,0 +1,6 @@
+static/libs/bower
+node_modules
+*.log
+static/music/Finalized/*.jpg
+static/music/Finalized/*.mp3
+.vscode/
