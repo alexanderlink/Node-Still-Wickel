@@ -19,9 +19,19 @@
             $scope.calendar = [];
             $scope.lastStillDiff = null;
             $scope.lastWickelDiff = null;
+            $scope.minutesToString = minutesToString;
             checkForNewData($scope);
             updateTimeSince($scope);
         }]);
+
+        function minutesToString(minutes) {
+          if(minutes < 60) return minutes + 'min';
+          else {
+            var hours = parseInt(minutes/60);
+            var restMinutes = minutes - hours*60;
+            return hours + 'h ' + restMinutes + 'min';
+          }
+        }
 
         function checkForNewData($scope) {
             $.getJSON( "http://raspi0:8083/api/data", function( rawdata ) {
@@ -132,6 +142,9 @@
 
         function populateCalendar($scope, days) {
           days.forEach(function(day) {
+            var wickelcount = 0;
+            var stillcount = 0;
+            var stillmillis = 0;
             day.hours.forEach(function(hourBucket, hour) {
               $scope.data.forEach(function(entry) {
                 if(entry.action == 'stop') return;
@@ -140,9 +153,18 @@
                 if(day.day != parseInt(entry.day)) return;
                 if(hour != parseInt(entry.hour)) return;
                 hourBucket.push(entry);
+                //Stats
+                if(entry.type == 'wickeln') wickelcount++;
+                if(entry.type == 'stillen' && entry.action == 'start') stillcount++;
+                if(entry.type == 'stillen' && entry.action == 'start' && entry.durationMillis) stillmillis += entry.durationMillis;
               })
               //hourBucket.push({type: 'dummy'});
             });
+            day.stats = {
+              stillcount: stillcount,
+              wickelcount: wickelcount,
+              stillminutes: parseInt(stillmillis/1000/60)
+            }
           });
         }
     </script>
@@ -184,6 +206,8 @@
     <x style="color:DarkCyan" ng-if="entry.durationMinutes">({{entry.durationMinutes}}min)</x>
   </li>
 </ul>
+
+
 
 <h3>Calendar</h3>
 
@@ -228,6 +252,26 @@
 <img src='img/time_3quarter.png' width="20px" height="20px"> Stillen (30-45min)<br>
 <img src='img/time_full.png' width="20px" height="20px"> Stillen (45+ min)<br>
 <br>
+
+
+
+<h3>Statistik</h3>
+
+<table>
+  <tr>
+    <th style="white-space: nowrap; padding:3px;">Tag</th>
+    <th style="white-space: nowrap; padding:3px;"># <img src='img/Child_in_diaper_icon.svg' width="20px" height="20px"></th>
+    <th style="white-space: nowrap; padding:3px;"># <img src='img/time_quarter.png' width="20px" height="20px"></th>
+    <th style="white-space: nowrap; padding:3px;"><img src='img/time_3quarter.png' width="20px" height="20px"></th>
+  </tr>
+  <tr ng-repeat="day in calendar.slice().reverse()">
+    <td style="white-space: nowrap; padding:3px;">{{day.day}}.{{day.month}}.</td>
+    <td style="white-space: nowrap; padding:3px;">{{day.stats.wickelcount}}</td>
+    <td style="white-space: nowrap; padding:3px;">{{day.stats.stillcount}}</td>
+    <td style="white-space: nowrap; padding:3px;">{{minutesToString(day.stats.stillminutes)}}</td>
+  </tr>
+</table>
+
 
 </body>
 </html>
