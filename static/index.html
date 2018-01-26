@@ -16,10 +16,11 @@
 
         angular.module('app').controller('MyController', ['$scope', function ($scope) {
             $scope.data = [{"time":"no data"}];
-            check($scope);
+            $scope.calendar = [];
+            checkForNewData($scope);
         }]);
 
-        function check($scope) {
+        function checkForNewData($scope) {
             $.getJSON( "http://raspi0:8083/api/data", function( rawdata ) {
                 var data = parseTime(rawdata);
                 calculateStillDuration(data);
@@ -27,9 +28,10 @@
                 $scope.$apply(function () {
                     $scope.data = data;
                 });
+                updateCalendar($scope);
             });
             setTimeout(function () {
-              check($scope);
+              checkForNewData($scope);
             }, 5000);
         }
 
@@ -80,12 +82,65 @@
             }
           })
         }
+
+        function updateCalendar($scope) {
+          var days = getDays($scope);
+          //var now = new Date();
+          //var day = {year: now.getFullYear(), month: now.getMonth()+1, day: now.getDate()}
+          days.forEach(function(day){
+            day.hours = [];
+            for(var hour = 0; hour < 24; hour++) day.hours[hour] = [];
+          });
+          populateCalendar($scope, days);
+          $scope.$apply(function () {
+            $scope.calendar = days;
+          });
+        }
+
+        function getDays($scope) {
+          var days = {};
+          $scope.data.forEach(function(entry) {
+            var day = {year: entry.year, month: entry.month, day: entry.day}
+            days[day.year+day.month+day.day] = day;
+          });
+          return Object.values(days);
+        }
+
+        function populateCalendar($scope, days) {
+          days.forEach(function(day) {
+            day.hours.forEach(function(hourBucket, hour) {
+              $scope.data.forEach(function(entry) {
+                if(entry.action == 'stop') return;
+                if(day.year != parseInt(entry.year)) return;
+                if(day.month != parseInt(entry.month)) return;
+                if(day.day != parseInt(entry.day)) return;
+                if(hour != parseInt(entry.hour)) return;
+                hourBucket.push(entry);
+              })
+              //hourBucket.push({type: 'dummy'});
+            });
+          });
+        }
     </script>
 
   <style>
     body {
         background-color: black;
         color: white;
+    }
+    td {
+      border-style: solid;
+      border-width: 1px;
+      border-color: grey;
+      width: 50px;
+      height: 50px;
+      text-align: center;
+    }
+    th {
+      text-align: center;
+      border-style: solid;
+      border-width: 1px;
+      border-color: grey;
     }
   </style>
 
@@ -100,8 +155,48 @@
     <x style="color:{{entry.color}}">{{entry.day}}.{{entry.month}}. {{entry.hour}}:{{entry.minute}} &ndash; {{entry.type == 'stillen' ? 'Stillen' : 'Wickeln'}}</x>
     <x style="color:DarkCyan" ng-if="entry.durationMinutes">({{entry.durationMinutes}}min)</x>
   </li>
-<ul>
+</ul>
 
+<h3>Calendar</h3>
+<table>
+  <tr>
+    <th>Tag</th>
+    <th>0:00</th><th>1:00</th><th>2:00</th><th>3:00</th><th>4:00</th><th>5:00</th>
+    <th>6:00</th><th>7:00</th><th>8:00</th><th>9:00</th><th>10:00</th><th>11:00</th>
+    <th>12:00</th><th>13:00</th><th>14:00</th><th>15:00</th><th>16:00</th><th>17:00</th>
+    <th>18:00</th><th>19:00</th><th>20:00</th><th>21:00</th><th>22:00</th><th>23:00</th>
+  </tr>
+  <tr ng-repeat="day in calendar.slice().reverse()">
+      <td>{{day.day}}.{{day.month}}.</td>
+      <td ng-repeat="hour in day.hours">
+          <x ng-if="hour.length <= 0">
+            &nbsp;
+          </x>
+          <x ng-if="hour.length > 0" ng-repeat="entry in hour">
+            <img ng-if="entry.type == 'wickeln'" src='img/Child_in_diaper_icon.svg' width="20px" height="20px" title="{{entry.hour + ':' + entry.minute}}">
+            <img ng-if="entry.type == 'stillen' && !entry.durationMinutes || entry.durationMinutes <= 0"
+                src='img/time_unknown.png' width="20px" height="20px" title="{{entry.hour + ':' + entry.minute}}">
+            <img ng-if="entry.type == 'stillen' && entry.durationMinutes && entry.durationMinutes > 0 && entry.durationMinutes <= 15"
+                src='img/time_quarter.png' width="20px" height="20px" title="{{entry.hour + ':' + entry.minute + ' ' + entry.durationMinutes + 'min'}}">
+            <img ng-if="entry.type == 'stillen' && entry.durationMinutes && entry.durationMinutes > 15 && entry.durationMinutes <= 30"
+                src='img/time_half.png' width="20px" height="20px" title="{{entry.hour + ':' + entry.minute + ' ' + entry.durationMinutes + 'min'}}">
+            <img ng-if="entry.type == 'stillen' && entry.durationMinutes && entry.durationMinutes > 30 && entry.durationMinutes <= 45"
+                src='img/time_3quarter.png' width="20px" height="20px" title="{{entry.hour + ':' + entry.minute + ' ' + entry.durationMinutes + 'min'}}">
+            <img ng-if="entry.type == 'stillen' && entry.durationMinutes && entry.durationMinutes > 45"
+                src='img/time_full.png' width="20px" height="20px" title="{{entry.hour + ':' + entry.minute + ' ' + entry.durationMinutes + 'min'}}">
+          </x>
+      </td>
+  </tr>
+</table>
+
+<br>
+<img src='img/Child_in_diaper_icon.svg' width="20px" height="20px"> Wickeln<br>
+<img src='img/time_unknown.png' width="20px" height="20px"> Stillen (Zeit unbekannt)<br>
+<img src='img/time_quarter.png' width="20px" height="20px"> Stillen (0-15min)<br>
+<img src='img/time_half.png' width="20px" height="20px"> Stillen (15-30min)<br>
+<img src='img/time_3quarter.png' width="20px" height="20px"> Stillen (30-45min)<br>
+<img src='img/time_full.png' width="20px" height="20px"> Stillen (45+ min)<br>
+<br>
 
 </body>
 </html>
