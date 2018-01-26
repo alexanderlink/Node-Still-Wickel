@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="app">
+<head>
+  <title>Angular Standalone</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.7/angular.js"></script>
+  
+    <script>
+        var app = angular.module('app', []);
+
+        angular.module('app').controller('MyController', ['$scope', function ($scope) {
+            $scope.data = [{"time":"no data"}];
+            check($scope);
+        }]);
+
+        function check($scope) {
+            $.getJSON( "http://raspi0:8083/api/data", function( rawdata ) {
+                var data = parseTime(rawdata);
+                $scope.$apply(function () {
+                    $scope.data = data;
+                });
+            });
+            setTimeout(function () {
+              check($scope);
+            }, 5000);
+        }
+
+        function parseTime(rawdata) {
+          var data = [];
+          rawdata.forEach(function(entry) {
+            var time = entry.time;
+            var regex = /([0-9]*)-([0-9]*)-([0-9]*) ([0-9]*):([0-9]*):([0-9]*)\.([0-9]*)/
+            var result = regex.exec(time);
+            entry.year = result[1];
+            entry.month = result[2];
+            entry.day = result[3];
+            entry.hour = parseInt(result[4]) + 1; //CET
+            if(entry.hour >= 24) entry.hour = entry.hour - 24;
+            entry.hour = entry.hour < 10 ? '0' + entry.hour : '' + entry.hour
+            entry.minute = result[5];
+            entry.second = result[6];
+            entry.millis = result[7];
+            data.push(entry);
+          });
+          return data;
+        }
+    </script>
+
+  <style>
+    body {
+        background-color: black;
+        color: white;
+    }
+  </style>
+
+</head>
+
+<body ng-controller="MyController">
+
+<h3>Wickeln & Stillen</h3>
+
+<ul>
+  <li ng-repeat="entry in data.slice().reverse()" ng-if="entry.action != 'stop'">
+    {{entry.day}}.{{entry.month}} {{entry.hour}}:{{entry.minute}} &ndash; {{entry.type == 'stillen' ? 'Stillen' : 'Wickeln'}}
+  </li>
+<ul>
+
+
+</body>
+</html>

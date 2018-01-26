@@ -3,17 +3,13 @@ var serveStatic = require('serve-static');
 var fs = require('fs');
 var app = express();
 
-app.get('/wickel', function (req, res) {
-    fs.readFile('./static/wickel.dat', 'utf8', function(err, contents) {
-        if(!contents) contents = ""
-        res.send(contents.replace("\n", "<br>"));
-    });
-});
-
-app.get('/still', function (req, res) {
-    fs.readFile('./static/still.dat', 'utf8', function(err, contents) {
-        if(!contents) contents = ""
-        res.send(contents.replace("\n", "<br>"));
+app.get('/api/data', function (req, res) {
+    fs.readFile('./static/data.dat', 'utf8', function(err, contents) {
+        if(!contents) contents = "";
+        contents = "[" + contents + "]";
+        res.set('Content-Type', 'application/json');
+        res.set('Access-Control-Allow-Origin', '*');
+        res.send(contents.replace(new RegExp("}{", 'g'), "},\n{"));
     });
 });
 

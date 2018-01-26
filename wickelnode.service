@@ -1,0 +1,16 @@
+[Unit]
+Description=Wickel Node
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/pi/Still-Wickel-Logger/Node-Still-Wickel
+User=root
+Group=root
+ExecStart=/home/pi/Still-Wickel-Logger/Node-Still-Wickel/start.sh
+ExecStop=
+Restart=always
+SyslogIdentifier=WickelNode
+
+[Install]
+WantedBy=multi-user.target
