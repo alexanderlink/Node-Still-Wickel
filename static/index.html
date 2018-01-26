@@ -22,6 +22,8 @@
         function check($scope) {
             $.getJSON( "http://raspi0:8083/api/data", function( rawdata ) {
                 var data = parseTime(rawdata);
+                calculateStillDuration(data);
+                calculateColor(data);
                 $scope.$apply(function () {
                     $scope.data = data;
                 });
@@ -50,6 +52,34 @@
           });
           return data;
         }
+
+        function calculateStillDuration(data) {
+          var prev = null;
+          data.forEach(function(entry) {
+            if(entry.type != 'stillen') return;
+            if(entry.action === 'stop' && prev && prev.action === 'start') {
+              prev.durationMillis = calculateDuration(prev, entry);
+              prev.durationMinutes = parseInt(prev.durationMillis/1000/60);
+            }
+            prev = entry;
+          });
+        }
+
+        function calculateDuration(start, stop) {
+            var stopDate = new Date(stop.time); //new Date(Date.UTC(2013, 1, 1, 14, 0, 5));
+            var startDate = new Date(start.time); //new Date(Date.UTC(2013, 1, 1, 14, 0, 0));
+            return stopDate - startDate;
+        }
+
+        function calculateColor(data) {
+          data.forEach(function(entry) {
+            if(entry.type == "wickeln") {
+              entry.color = "brown"
+            } else if(entry.type="stillen") {
+              entry.color = "white"
+            }
+          })
+        }
     </script>
 
   <style>
@@ -67,7 +97,8 @@
 
 <ul>
   <li ng-repeat="entry in data.slice().reverse()" ng-if="entry.action != 'stop'">
-    {{entry.day}}.{{entry.month}} {{entry.hour}}:{{entry.minute}} &ndash; {{entry.type == 'stillen' ? 'Stillen' : 'Wickeln'}}
+    <x style="color:{{entry.color}}">{{entry.day}}.{{entry.month}}. {{entry.hour}}:{{entry.minute}} &ndash; {{entry.type == 'stillen' ? 'Stillen' : 'Wickeln'}}</x>
+    <x style="color:DarkCyan" ng-if="entry.durationMinutes">({{entry.durationMinutes}}min)</x>
   </li>
 <ul>
 
