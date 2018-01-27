@@ -206,7 +206,8 @@
 <a class="btn btn-default" href="#liste"><img src='img/Child_in_diaper_icon.svg' width="20px" height="20px"> {{lastWickelDiff}}min</a>
 </p>
 
-<h3 id="liste">Wickeln & Stillen</h3>
+<!-- OLD -->
+<!--h3 id="liste">Wickeln & Stillen</h3>
 
 <ul>
   <li ng-repeat="entry in data.slice().reverse()" ng-if="entry.action != 'stop'">
@@ -225,9 +226,35 @@
     <x style="color:{{entry.color}}">{{entry.type == 'stillen' ? 'Stillen' : 'Wickeln'}}</x>
     <x style="color:DarkCyan" ng-if="entry.durationMinutes">({{entry.durationMinutes}}min)</x>
   </li>
-</ul>
+</ul-->
 
 
+<h3 id="liste">Wickeln & Stillen</h3>
+
+<div ng-repeat="day in calendar.slice().reverse()">
+  <h4>{{day.day}}.{{day.month}}.{{day.year}}</h4>
+  <ul>
+  <x ng-repeat="hour in day.hours.slice().reverse()">
+    <li ng-repeat="entry in hour.slice().reverse()" ng-if="entry.action != 'stop'">
+      <x style="color:{{entry.color}}">{{entry.hour}}:{{entry.minute}} </x>
+          <img ng-if="entry.type == 'wickeln'" src='img/Child_in_diaper_icon.svg' width="15px" height="15px" title="{{entry.hour + ':' + entry.minute}}">
+          <img ng-if="entry.type == 'stillen' && !entry.durationMinutes || entry.durationMinutes <= 0"
+              src='img/time_unknown.png' width="15px" height="15px" title="{{entry.hour + ':' + entry.minute}}">
+          <img ng-if="entry.type == 'stillen' && entry.durationMinutes && entry.durationMinutes > 0 && entry.durationMinutes <= 15"
+              src='img/time_quarter.png' width="15px" height="15px" title="{{entry.hour + ':' + entry.minute + ' ' + entry.durationMinutes + 'min'}}">
+          <img ng-if="entry.type == 'stillen' && entry.durationMinutes && entry.durationMinutes > 15 && entry.durationMinutes <= 30"
+              src='img/time_half.png' width="15px" height="15px" title="{{entry.hour + ':' + entry.minute + ' ' + entry.durationMinutes + 'min'}}">
+          <img ng-if="entry.type == 'stillen' && entry.durationMinutes && entry.durationMinutes > 30 && entry.durationMinutes <= 45"
+              src='img/time_3quarter.png' width="15px" height="15px" title="{{entry.hour + ':' + entry.minute + ' ' + entry.durationMinutes + 'min'}}">
+          <img ng-if="entry.type == 'stillen' && entry.durationMinutes && entry.durationMinutes > 45"
+              src='img/time_full.png' width="15px" height="15px" title="{{entry.hour + ':' + entry.minute + ' ' + entry.durationMinutes + 'min'}}">
+      <x style="color:{{entry.color}}">{{entry.type == 'stillen' ? 'Stillen' : 'Wickeln'}}</x>
+      <x style="color:DarkCyan" ng-if="entry.durationMinutes">({{entry.durationMinutes}}min)</x>
+    </li>
+  </x>
+  </ul>
+</div>
+<br>
 
 <h3 id="calendar">Kalender</h3>
 
