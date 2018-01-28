@@ -276,7 +276,7 @@
           <x style="color:DarkCyan" ng-if="entry.durationMinutes">({{entry.durationMinutes}}min)</x>
           <x ng-if="entry.action == 'stop'">(Stop)</x>
 
-          <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<x style="color:DarkCyan; font-size:0.8em; position: relative; top: -5px;" ng-if="entry.pauseMinutes">&#x25BC; {{millisToString(entry.pauseMillis)}}</x>
+          <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<x style="color:{{entry.color}}; font-size:0.8em; position: relative; top: -5px;" ng-if="entry.pauseMinutes">&#x25BC; {{millisToString(entry.pauseMillis)}}</x>
         </li>
       </x>
       </ul>
