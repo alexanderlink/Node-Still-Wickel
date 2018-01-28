@@ -15,21 +15,29 @@
         var app = angular.module('app', []);
 
         angular.module('app').controller('MyController', ['$scope', function ($scope) {
+            $scope.debug = true;
             $scope.data = [];
             $scope.calendar = [];
             $scope.lastStillDiff = null;
             $scope.lastWickelDiff = null;
             $scope.minutesToString = minutesToString;
+            $scope.millisToString = millisToString;
             checkForNewData($scope);
             updateTimeSince($scope);
         }]);
 
-        function minutesToString(minutes) {
-          if(minutes < 60) return minutes + 'min';
+        function millisToString(millis, short) {
+          return minutesToString(millis/1000/60, short);
+        }
+
+        function minutesToString(minutes, short) {
+          var symbolMin = short ? 'm' : 'min';
+          var symbolHour = short ? 'h' : 'h';
+          if(minutes < 60) return parseInt(minutes) + symbolMin;
           else {
             var hours = parseInt(minutes/60);
-            var restMinutes = minutes - hours*60;
-            return hours + 'h ' + restMinutes + 'min';
+            var restMinutes = parseInt(minutes - hours*60);
+            return hours + symbolHour + ' ' + restMinutes + symbolMin;
           }
         }
 
@@ -38,6 +46,7 @@
                 //if($scope.data.length != rawdata.length) {
                   var data = parseTime(rawdata);
                   calculateStillDuration(data);
+                  calculatePauseBetween(data);
                   calculateColor(data);
                   $scope.$apply(function () {
                       $scope.data = data;
@@ -101,6 +110,26 @@
           });
         }
 
+        function calculatePauseBetween(data) {
+          var prevStillen = null;
+          var prevWickeln = null;
+          data.forEach(function(entry) {
+            if(entry.type == 'stillen') {
+              if(prevStillen) {
+                entry.pauseMillis = calculateDuration(prevStillen, entry);
+                entry.pauseMinutes = parseInt(entry.pauseMillis/1000/60);
+              }
+              prevStillen = entry;
+            } else if(entry.type == 'wickeln') {
+              if(prevWickeln) {
+                entry.pauseMillis = calculateDuration(prevWickeln, entry);
+                entry.pauseMinutes = parseInt(entry.pauseMillis/1000/60);
+              }
+              prevWickeln = entry;
+            }
+          });
+        }
+
         function calculateDuration(start, stop) {
             var stopDate = new Date(stop.time); //new Date(Date.UTC(2013, 1, 1, 14, 0, 5));
             var startDate = new Date(start.time); //new Date(Date.UTC(2013, 1, 1, 14, 0, 0));
@@ -147,7 +176,7 @@
             var stillmillis = 0;
             day.hours.forEach(function(hourBucket, hour) {
               $scope.data.forEach(function(entry) {
-                if(entry.action == 'stop') return;
+                //if(entry.action == 'stop') return;
                 if(day.year != parseInt(entry.year)) return;
                 if(day.month != parseInt(entry.month)) return;
                 if(day.day != parseInt(entry.day)) return;
@@ -214,8 +243,8 @@
       <a data-toggle="tab" href="#liste">Liste</a></li>
   <li><a data-toggle="tab" href="#calendar">Kalender</a></li>
   <li><a style="margin-right: 5px" data-toggle="tab" href="#stats">Statistik</a></li>
-  <a class="btn btn-default notify" data-toggle="tab" href="#liste"><img src='img/time_quarter.png' width="20px" height="20px"> {{lastStillDiff}}m</a>
-  <a class="btn btn-default notify" data-toggle="tab" href="#liste"><img src='img/Child_in_diaper_icon.svg' width="20px" height="20px"> {{lastWickelDiff}}m</a>
+  <a class="btn btn-default notify" data-toggle="tab" href="#liste"><img src='img/time_quarter.png' width="20px" height="20px"> {{minutesToString(lastStillDiff, true)}}</a>
+  <a class="btn btn-default notify" data-toggle="tab" href="#liste"><img src='img/Child_in_diaper_icon.svg' width="20px" height="20px"> {{minutesToString(lastWickelDiff, true)}}</a>
 </ul>
 
 <div class="tab-content">
@@ -229,7 +258,9 @@
       <x ng-repeat="hour in day.hours.slice().reverse()">
         <li ng-repeat="entry in hour.slice().reverse()" ng-if="entry.action != 'stop'">
           <x style="color:{{entry.color}}">{{entry.hour}}:{{entry.minute}} </x>
+
               <img ng-if="entry.type == 'wickeln'" src='img/Child_in_diaper_icon.svg' width="15px" height="15px" title="{{entry.hour + ':' + entry.minute}}">
+
               <img ng-if="entry.type == 'stillen' && !entry.durationMinutes || entry.durationMinutes <= 0"
                   src='img/time_unknown.png' width="15px" height="15px" title="{{entry.hour + ':' + entry.minute}}">
               <img ng-if="entry.type == 'stillen' && entry.durationMinutes && entry.durationMinutes > 0 && entry.durationMinutes <= 15"
@@ -240,8 +271,12 @@
                   src='img/time_3quarter.png' width="15px" height="15px" title="{{entry.hour + ':' + entry.minute + ' ' + entry.durationMinutes + 'min'}}">
               <img ng-if="entry.type == 'stillen' && entry.durationMinutes && entry.durationMinutes > 45"
                   src='img/time_full.png' width="15px" height="15px" title="{{entry.hour + ':' + entry.minute + ' ' + entry.durationMinutes + 'min'}}">
+
           <x style="color:{{entry.color}}">{{entry.type == 'stillen' ? 'Stillen' : 'Wickeln'}}</x>
           <x style="color:DarkCyan" ng-if="entry.durationMinutes">({{entry.durationMinutes}}min)</x>
+          <x ng-if="entry.action == 'stop'">(Stop)</x>
+
+          <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<x style="color:DarkCyan; font-size:0.8em; position: relative; top: -5px;" ng-if="entry.pauseMinutes">&#x25BC; {{millisToString(entry.pauseMillis)}}</x>
         </li>
       </x>
       </ul>
@@ -270,7 +305,7 @@
               <x ng-if="hour.length <= 0">
                 &nbsp;
               </x>
-              <x ng-if="hour.length > 0" ng-repeat="entry in hour">
+              <x ng-if="hour.length > 0 && entry.action != 'stop'" ng-repeat="entry in hour">
                 <img ng-if="entry.type == 'wickeln'" src='img/Child_in_diaper_icon.svg' width="20px" height="20px" title="{{entry.hour + ':' + entry.minute}}">
                 <img ng-if="entry.type == 'stillen' && !entry.durationMinutes || entry.durationMinutes <= 0"
                     src='img/time_unknown.png' width="20px" height="20px" title="{{entry.hour + ':' + entry.minute}}">
