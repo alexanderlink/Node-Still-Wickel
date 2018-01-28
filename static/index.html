@@ -37,7 +37,11 @@
           else {
             var hours = parseInt(minutes/60);
             var restMinutes = parseInt(minutes - hours*60);
-            return hours + symbolHour + ' ' + restMinutes + symbolMin;
+            if(short) {
+              return hours + ':' + (restMinutes < 10 ? '0'+restMinutes : restMinutes);
+            } else {
+              return hours + symbolHour + ' ' + restMinutes + symbolMin;
+            }
           }
         }
 
