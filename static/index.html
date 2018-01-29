@@ -213,8 +213,8 @@
       border-style: solid;
       border-width: 1px;
       border-color: grey;
-      width: 50px;
-      height: 50px;
+      width: 40px;
+      height: 40px;
       text-align: center;
     }
     th {
@@ -222,6 +222,9 @@
       border-style: solid;
       border-width: 1px;
       border-color: grey;
+    }
+    th.small {
+      font-size: 10pt;
     }
     .notify {
       background-color: white;
@@ -235,6 +238,12 @@
     }
     .btn {
       padding: 6px 5px;
+    }
+    .calender-icon {
+      width: 15px;
+      height: 15px;
+      margin: 0px;
+      padding: 0px;
     }
   </style>
 
@@ -294,14 +303,14 @@
 
     <h3>Kalender</h3>
 
-    <div class="table-responsive">
-    <table class="table">
+    <div>
+    <table>
       <tr>
-        <th>Tag</th>
-        <th>0:00</th><th>1:00</th><th>2:00</th><th>3:00</th><th>4:00</th><th>5:00</th>
-        <th>6:00</th><th>7:00</th><th>8:00</th><th>9:00</th><th>10:00</th><th>11:00</th>
-        <th>12:00</th><th>13:00</th><th>14:00</th><th>15:00</th><th>16:00</th><th>17:00</th>
-        <th>18:00</th><th>19:00</th><th>20:00</th><th>21:00</th><th>22:00</th><th>23:00</th>
+        <th>Uhr</th>
+        <th class="small">0</th><th class="small">1</th><th class="small">2</th><th class="small">3</th><th class="small">4</th><th class="small">5</th>
+        <th class="small">6</th><th class="small">7</th><th class="small">8</th><th class="small">9</th><th class="small">10</th><th class="small">11</th>
+        <th class="small">12</th><th class="small">13</th><th class="small">14</th><th class="small">15</th><th class="small">16</th><th class="small">17</th>
+        <th class="small">18</th><th class="small">19</th><th class="small">20</th><th class="small">21</th><th class="small">22</th><th class="small">23</th>
       </tr>
       <tr ng-repeat="day in calendar.slice().reverse()">
           <td>{{day.day}}.{{day.month}}.</td>
@@ -310,17 +319,17 @@
                 &nbsp;
               </x>
               <x ng-if="hour.length > 0 && entry.action != 'stop'" ng-repeat="entry in hour">
-                <img ng-if="entry.type == 'wickeln'" src='img/Child_in_diaper_icon.svg' width="20px" height="20px" title="{{entry.hour + ':' + entry.minute}}">
+                <img ng-if="entry.type == 'wickeln'" src='img/Child_in_diaper_icon.svg'class="calender-icon" title="{{entry.hour + ':' + entry.minute}}">
                 <img ng-if="entry.type == 'stillen' && !entry.durationMinutes || entry.durationMinutes <= 0"
-                    src='img/time_unknown.png' width="20px" height="20px" title="{{entry.hour + ':' + entry.minute}}">
+                    src='img/time_unknown.png' class="calender-icon" title="{{entry.hour + ':' + entry.minute}}">
                 <img ng-if="entry.type == 'stillen' && entry.durationMinutes && entry.durationMinutes > 0 && entry.durationMinutes <= 15"
-                    src='img/time_quarter.png' width="20px" height="20px" title="{{entry.hour + ':' + entry.minute + ' ' + entry.durationMinutes + 'min'}}">
+                    src='img/time_quarter.png' class="calender-icon" title="{{entry.hour + ':' + entry.minute + ' ' + entry.durationMinutes + 'min'}}">
                 <img ng-if="entry.type == 'stillen' && entry.durationMinutes && entry.durationMinutes > 15 && entry.durationMinutes <= 30"
-                    src='img/time_half.png' width="20px" height="20px" title="{{entry.hour + ':' + entry.minute + ' ' + entry.durationMinutes + 'min'}}">
+                    src='img/time_half.png' class="calender-icon" title="{{entry.hour + ':' + entry.minute + ' ' + entry.durationMinutes + 'min'}}">
                 <img ng-if="entry.type == 'stillen' && entry.durationMinutes && entry.durationMinutes > 30 && entry.durationMinutes <= 45"
-                    src='img/time_3quarter.png' width="20px" height="20px" title="{{entry.hour + ':' + entry.minute + ' ' + entry.durationMinutes + 'min'}}">
+                    src='img/time_3quarter.png' class="calender-icon" title="{{entry.hour + ':' + entry.minute + ' ' + entry.durationMinutes + 'min'}}">
                 <img ng-if="entry.type == 'stillen' && entry.durationMinutes && entry.durationMinutes > 45"
-                    src='img/time_full.png' width="20px" height="20px" title="{{entry.hour + ':' + entry.minute + ' ' + entry.durationMinutes + 'min'}}">
+                    src='img/time_full.png' class="calender-icon" title="{{entry.hour + ':' + entry.minute + ' ' + entry.durationMinutes + 'min'}}">
               </x>
           </td>
       </tr>
@@ -328,12 +337,12 @@
     </div>
 
     <br>
-    <img src='img/Child_in_diaper_icon.svg' width="20px" height="20px"> Wickeln<br>
-    <img src='img/time_unknown.png' width="20px" height="20px"> Stillen (Zeit unbekannt)<br>
-    <img src='img/time_quarter.png' width="20px" height="20px"> Stillen (0-15min)<br>
-    <img src='img/time_half.png' width="20px" height="20px"> Stillen (15-30min)<br>
-    <img src='img/time_3quarter.png' width="20px" height="20px"> Stillen (30-45min)<br>
-    <img src='img/time_full.png' width="20px" height="20px"> Stillen (45+ min)<br>
+    <img class="calender-icon" src='img/Child_in_diaper_icon.svg'> Wickeln<br>
+    <img class="calender-icon"src='img/time_unknown.png'> Stillen (Zeit unbekannt)<br>
+    <img class="calender-icon"src='img/time_quarter.png'> Stillen (0-15min)<br>
+    <img class="calender-icon"src='img/time_half.png'> Stillen (15-30min)<br>
+    <img class="calender-icon"src='img/time_3quarter.png'> Stillen (30-45min)<br>
+    <img class="calender-icon"src='img/time_full.png'> Stillen (45+ min)<br>
     <br>
 
 

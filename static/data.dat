@@ -158,8 +158,11 @@
 {"type": "stillen", "time": "2018-01-29 12:18:03.707926", "action": "start"}
 {"type": "stillen", "time": "2018-01-29 12:45:09.430735", "action": "stop"}
 {"type": "stillen", "time": "2018-01-29 13:42:37.271874", "action": "start"}
+{"type": "wickeln", "time": "2018-01-29 14:00:00.000000", "action": "start"}
 {"type": "stillen", "time": "2018-01-29 14:07:04.579094", "action": "stop"}
 {"type": "stillen", "time": "2018-01-29 15:55:07.996343", "action": "start"}
 {"type": "stillen", "time": "2018-01-29 16:25:34.423947", "action": "stop"}
 {"type": "stillen", "time": "2018-01-29 16:35:35.823895", "action": "start"}
 {"type": "stillen", "time": "2018-01-29 16:43:58.100606", "action": "stop"}
+{"type": "wickeln", "time": "2018-01-29 17:51:48.442792", "action": "start"}
+{"type": "stillen", "time": "2018-01-29 18:10:44.889047", "action": "start"}
