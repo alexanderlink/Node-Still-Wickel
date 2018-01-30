@@ -207,8 +207,8 @@
             day.stats = {
               stillcount: stillcount,
               wickelcount: wickelcount,
-              stillminutes: parseInt(stillmillis/1000/60),
-              stillaverage: parseInt(stillmillis/1000/60) / stillcount
+              stillmillis: stillmillis,
+              stillaverage: stillmillis / stillcount
             }
           });
         }
@@ -401,7 +401,7 @@
         <td style="white-space: nowrap; padding:3px;">{{day.stats.wickelcount}}</td>
         <td style="white-space: nowrap; padding:3px;">{{day.stats.stillcount}}</td>
         <td style="white-space: nowrap; padding:3px;">{{millisToString(day.stats.stillmillis)}}</td>
-        <td style="white-space: nowrap; padding:3px;">{{day.stats.stillaverage.toFixed(2)}}min</td>
+        <td style="white-space: nowrap; padding:3px;">{{millisToString(day.stats.stillaverage)}}</td>
         
       </tr>
     </table>
