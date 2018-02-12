@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
   <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
@@ -17,13 +18,15 @@
         angular.module('app').controller('MyController', ['$scope', function ($scope) {
             $scope.debug = false;
             if($scope.debug) runTests();
-
+            
+            $scope.editMode = false;
             $scope.data = [];
             $scope.calendar = [];
             $scope.lastStillDiff = null;
             $scope.lastWickelDiff = null;
             $scope.millisToString = millisToString;
             $scope.milkTypeName = milkTypeName;
+            $scope.changeMilkType = changeMilkType;
             checkForNewData($scope);
         }]);
 
@@ -88,6 +91,12 @@
           if(id === 'powder') return 'Milchpulver';
           if(id === 'breast') return 'Brust';
           if(id === 'pump') return 'Abgepumpt';
+        }
+
+        function changeMilkType(time, type) {
+          var body = {time: time, milkType: type};
+          $.post( "http://raspi0:8083/api/mods", body, function success() {
+          });
         }
 
         function updateTimeSince($scope) {
@@ -311,6 +320,9 @@
   <li><a style="margin-right: 5px" data-toggle="tab" href="#stats">Statistik</a></li>
   <a class="btn btn-default notify" data-toggle="tab" href="#liste"><img src='img/time_quarter.png' width="20px" height="20px"> {{millisToString(lastStillDiff, true)}}</a>
   <a class="btn btn-default notify" data-toggle="tab" href="#liste"><img src='img/Child_in_diaper_icon.svg' width="20px" height="20px"> {{millisToString(lastWickelDiff, true)}}</a>
+  
+  <a class="pull-right" ng-click="editMode = !editMode" href="#"><i class="material-icons">mode_edit</i></a>
+  <a class="pull-right" ng-click="debug = !debug" href="#"><i class="material-icons">bug_report</i></a>
 </ul>
 
 <div class="tab-content">
@@ -342,7 +354,11 @@
           <x style="color:DarkCyan" ng-if="entry.durationMinutes">({{entry.durationMinutes}}min)</x>
           <x ng-if="entry.action == 'stop'">(Stop)</x>
 
-          <x ng-if="entry.milkType">({{milkTypeName(entry.milkType)}})</x>
+          <x ng-if="entry.milkType && entry.type == 'stillen'">({{milkTypeName(entry.milkType)}})</x>
+
+          <a ng-if="editMode && entry.type == 'stillen'" ng-click="changeMilkType(entry.time, 'breast')" href="#" class="btn-xs btn-info">Brust</a>
+          <a ng-if="editMode && entry.type == 'stillen'" ng-click="changeMilkType(entry.time, 'pump')"  href="#" class="btn-xs btn-info">Pumpe</a>
+          <a ng-if="editMode && entry.type == 'stillen'" ng-click="changeMilkType(entry.time, 'powder')"  href="#" class="btn-xs btn-info">Pulver</a>
 
           <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<x style="color:{{entry.color}}; font-size:0.8em; position: relative; top: -5px;" ng-if="entry.pauseMillis">&#x25BC; {{millisToString(entry.pauseMillis)}}</x>
         </li>
